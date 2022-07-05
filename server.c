@@ -20,7 +20,7 @@ void server_stop(server_s server){
 void server_listen(server_s *server) {
   printf("Waiting for connection...\n");
   settings_s settings;
-  settings.char_limit = 1024;
+  settings.char_limit = 2048;
 
   server->connection[server->connection_s] = server_socket_connect(server->data, settings);
   server->connection_s++;
@@ -28,15 +28,17 @@ void server_listen(server_s *server) {
 }
 
 char* server_read(server_s* server){
-  char buffer[1024] = {0};
-  read(server->connection[0].sock, buffer, 1024);
+  char buffer[server->connection->settings.char_limit];
+  memset(buffer, 0, server->connection->settings.char_limit);
+
+  read(server->connection[0].sock, buffer, server->connection->settings.char_limit);
   char* result;
   asprintf(&result, "%s", buffer);
 
   return result;
 }
 
-void server_send(server_s* server, char* message){
+void server_send(server_s* server,const char* message){
   for(int i = 0; i < server->connection_s; i++){
     send(server->connection[i].sock, message, strlen(message), 0);
   }

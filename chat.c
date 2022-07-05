@@ -3,39 +3,63 @@
 #include <stdio.h>
 #include <curses.h>
 #include <string.h>
+#include <time.h>
 
 #include "./socket.h"
 #include "./server.h"
+#include "./message.h"
 
 #define ARGV_RUN(run_str, run_func) if (!strcmp(argv[1], run_str)) { \
     run_func;                                                       \
   };
 
 void client_run() {
-  settings_s settings;
-  settings.char_limit = 1024;
+  time_t timer;
+  message_s message = {
+    .data = "Hello from client!\n",
+    .username = "mystic",
+    .datetime = time(&timer)
+  };
+  const char *message_j = message_json_serialize(message);
 
+  settings_s settings;
+  settings.char_limit = 2048;
   char *url = "127.0.0.1";
   connection_s client = client_socket_connect(url, 1234, settings);
 
-  char *hello = "Hello from client!\n";
-  char buffer[1024] = {0};
-  send(client.sock, hello, strlen(hello), 0);
+  send(client.sock, message_j, strlen(message_j), 0);
   printf("Message sent!\n");
 
-  read(client.sock, buffer, 1024);
-  printf("%s\n", buffer);
+  char buffer[2048] = {0};
+  read(client.sock, buffer, 2048);
+  message_s message_c = message_json_deserialize(buffer);
+  printf("[%d:%d] %s: %s\n",
+         localtime(&message_c.datetime)->tm_hour,
+         localtime(&message_c.datetime)->tm_min,
+         message_c.username,
+         message_c.data);
 
   close(client.fd);
 }
 
 void server_run() {
+  time_t timer;
+  message_s message = {
+    .data = "Hello from server!",
+    .username = "server",
+    .datetime = time(&timer)
+  };
+  const char *message_j = message_json_serialize(message);
+
   server_s server = server_new(1234);
   server_listen(&server);
 
   char* buffer = server_read(&server);
-  printf("%s", buffer);
-  server_send(&server, "Hello world from server!");
+  message_s message_c = message_json_deserialize(buffer);
+  printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
+         localtime(&message_c.datetime)->tm_min, message_c.username,
+         message_c.data);
+  server_send(&server, message_j);
 
   server_stop(server);
 }
