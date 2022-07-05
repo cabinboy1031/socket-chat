@@ -15,7 +15,13 @@
   json_object *obj;                               \
   json_object_object_get_ex(data, token, &obj);   \
   expression;                                     \
-  }                                               \
+  }
+
+#define set_data(object, token, expression, data)\
+  {                                              \
+    json_object *obj = expression(data);         \
+    json_object_object_add(object,token,obj);    \
+  }
 
 message_s message_json_deserialize(const char* message){
   json_tokener *json = json_tokener_new();
@@ -36,16 +42,11 @@ message_s message_json_deserialize(const char* message){
 }
 
 const char* message_json_serialize(message_s message){
-  json_object *obj = json_object_new_object();
+  json_object *object = json_object_new_object();
 
-  json_object *obj_data = json_object_new_string(message.data);
-  json_object_object_add(obj, "data", obj_data);
+  set_data(object, "data", json_object_new_string, message.data);
+  set_data(object, "username", json_object_new_string, message.username);
+  set_data(object, "datetime", json_object_new_uint64, message.datetime);
 
-  json_object *obj_username = json_object_new_string(message.username);
-  json_object_object_add(obj, "username", obj_username);
-
-  json_object *obj_datetime = json_object_new_uint64(message.datetime);
-  json_object_object_add(obj, "datetime", obj_datetime);
-
-  return json_object_to_json_string(obj);
+  return json_object_to_json_string(object);
 }
