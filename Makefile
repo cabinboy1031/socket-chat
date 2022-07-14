@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -std=c11 -Wall -ggdb -O0 `pkg-config --cflags json-c`
 OBJS = chat.c server.o socket.o message.o mpack/mpack.o
 INCLUDE = `pkg-config --libs json-c`
-DEPS = socket.h
+DEPS =
 OUT_FILE = chat
 
 all: $(OUT_FILE) install   # build all listed targets: output_file, install
@@ -22,5 +22,6 @@ run: install                              # depend on install
 	$(OUT_FILE) || /bin/true              # No make error 10 if main() return non-zero
 
 clean:
-	rm -f *.o 2> /dev/null				  # Remove all *.o files
+	rm -f `find . -iname "*.o"` > /dev/null				  # Remove all *.o files
+	rm -f $(OUT_FILE)
 	sudo rm -f /usr/local/bin/$(OUT_FILE) # Remove the output_file
