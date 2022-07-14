@@ -20,7 +20,7 @@ void client_run() {
     .username = "mystic",
     .datetime = time(&timer)
   };
-  const char *message_j = message_json_serialize(message);
+  const char *message_j = message_mpack_serialize(message);
 
   settings_s settings;
   settings.char_limit = 2048;
@@ -32,7 +32,7 @@ void client_run() {
 
   char buffer[2048] = {0};
   read(client.sock, buffer, 2048);
-  message_s message_c = message_json_deserialize(buffer);
+  message_s message_c = message_mpack_deserialize(buffer);
   printf("[%d:%d] %s: %s\n",
          localtime(&message_c.datetime)->tm_hour,
          localtime(&message_c.datetime)->tm_min,
@@ -49,13 +49,13 @@ void server_run() {
     .username = "server",
     .datetime = time(&timer)
   };
-  const char *message_j = message_json_serialize(message);
+  const char *message_j = message_mpack_serialize(message);
 
   server_s server = server_new(1234);
   server_listen(&server);
 
   char* buffer = server_read(&server);
-  message_s message_c = message_json_deserialize(buffer);
+  message_s message_c = message_mpack_deserialize(buffer);
   printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
          localtime(&message_c.datetime)->tm_min, message_c.username,
          message_c.data);

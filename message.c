@@ -1,6 +1,7 @@
 #include "message.h"
 
 #include "mpack/mpack.h"
+
 #include <json-c/json.h>
 #include <stdio.h>
 #include <string.h>
@@ -65,8 +66,8 @@ message_s message_mpack_deserialize(const char* data){
   mpack_node_t root = mpack_tree_root(&tree);
 
   message_s result;
-  strcpy(result.data,mpack_node_str(mpack_node_map_cstr(root, "data")));
-  strcpy(result.username , mpack_node_str(mpack_node_map_cstr(root, "username")));
+  mpack_node_copy_cstr(mpack_node_map_cstr(root,"data"), result.data, 1024);
+  mpack_node_copy_cstr(mpack_node_map_cstr(root,"username"), result.username, 20);
   result.datetime = mpack_node_uint(mpack_node_map_cstr(root, "datetime"));
 
   return result;
@@ -78,14 +79,16 @@ const char* message_mpack_serialize(message_s message){
   mpack_writer_t writer;
   mpack_writer_init_growable(&writer, &data, &size);
 
+  mpack_start_map(&writer, 3);
   set_mpack_data(writer, "data", mpack_write_cstr, message.data);
   set_mpack_data(writer, "username", mpack_write_cstr, message.username);
   set_mpack_data(writer, "datetime", mpack_write_uint, message.datetime);
-  mpack_complete_map(&writer);
+  mpack_finish_map(&writer);
 
   if(mpack_writer_destroy(&writer) != mpack_ok){
     fprintf(stdout, "an error occurred encoding the data! \n");
     return "";
   }
+
   return data;
 }
