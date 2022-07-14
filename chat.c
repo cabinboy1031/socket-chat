@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
     printf("Usage: ./chat [client | server]\n");
     return -1;
   }
-  ARGV_RUN("client", client_run());
-  ARGV_RUN("server", server_run());
+  ARGV_RUN("c", client_run());
+  ARGV_RUN("s", server_run());
 }
 
