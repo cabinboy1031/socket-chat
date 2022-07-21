@@ -44,3 +44,13 @@ void server_send(server_s* server,const char* message){
   }
   printf("Message sent!\n");
 }
+
+void server_close(server_s* server, int id){
+  close(server->connection[id].fd);
+
+  for(int i = id; i < server->connection_s - 1; i++){
+    server->connection[i] = server->connection[i + 1];
+  }
+
+  server->connection_s--;
+}

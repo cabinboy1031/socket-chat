@@ -11,6 +11,7 @@ typedef struct server_s {
 } server_s;
 
 server_s server_new(int port);
+void server_close(server_s* server, int id);
 void server_stop(server_s server);
 
 void server_listen(server_s* server);

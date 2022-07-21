@@ -51,15 +51,20 @@ void server_run() {
   };
   const char *message_j = message_mpack_serialize(message);
 
-  server_s server = server_new(1234);
-  server_listen(&server);
+  server_s server;
+  message_s message_c = {};
+  while(strcmp(message_c.data, "/quit")){
+    server = server_new(1234);
+    server_listen(&server);
+    char *buffer = server_read(&server);
+    message_c = message_mpack_deserialize(buffer);
 
-  char* buffer = server_read(&server);
-  message_s message_c = message_mpack_deserialize(buffer);
-  printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
-         localtime(&message_c.datetime)->tm_min, message_c.username,
-         message_c.data);
-  server_send(&server, message_j);
+    printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
+           localtime(&message_c.datetime)->tm_min, message_c.username,
+           message_c.data);
+    server_send(&server, message_j);
+    server_close(&server, 0);
+  }
 
   server_stop(server);
 }
