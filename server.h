@@ -2,11 +2,19 @@
 #include <stdio.h>
 #include "./socket.h"
 
+typedef struct client_s{
+  connection_s connection;
+  //TODO
+  // room_s* rooms; // used to limit bandwidth usage by choosing where to send messages
+  // size_t room_size;
+  // int user_id; // used to prevent spoofing
+} client_s;
 
 typedef struct server_s {
   char message_log[2048][10];
   connection_s data;
-  connection_s connection[20];
+  client_s client[20];
+  fd_set read_fd;
   size_t connection_s;
 } server_s;
 

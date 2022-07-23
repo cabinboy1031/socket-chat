@@ -13,13 +13,13 @@
     run_func;                                                       \
   };
 
-void client_run() {
+void client_run(const char* data) {
   time_t timer;
   message_s message = {
-    .data = "Hello from client!\n",
     .username = "mystic",
     .datetime = time(&timer)
   };
+  strcpy(message.data, data);
   const char *message_j = message_mpack_serialize(message);
 
   settings_s settings;
@@ -43,14 +43,6 @@ void client_run() {
 }
 
 void server_run() {
-  time_t timer;
-  message_s message = {
-    .data = "Hello from server!",
-    .username = "server",
-    .datetime = time(&timer)
-  };
-  const char *message_j = message_mpack_serialize(message);
-
   server_s server;
   message_s message_c = {};
   while(strcmp(message_c.data, "/quit")){
@@ -62,6 +54,13 @@ void server_run() {
     printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
            localtime(&message_c.datetime)->tm_min, message_c.username,
            message_c.data);
+
+    time_t timer;
+    message_s message = {.username = "server",
+                         .datetime = time(&timer)};
+    strcpy(message.data, message_c.data);
+    const char *message_j = message_mpack_serialize(message);
+
     server_send(&server, message_j);
     server_close(&server, 0);
   }
@@ -86,11 +85,15 @@ int main(int argc, char* argv[]){
   refresh();
   */
 
-  if(argc != 2){
+  if(argc == 1){
     printf("Usage: ./chat [c | s]\n");
     return -1;
   }
-  ARGV_RUN("c", client_run());
+
+  ARGV_RUN("c",
+    char data[1024] = {0};
+    read(0, data, 1024);
+    client_run(data));
   ARGV_RUN("s", server_run());
 }
 

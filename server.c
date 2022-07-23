@@ -22,16 +22,16 @@ void server_listen(server_s *server) {
   settings_s settings;
   settings.char_limit = 2048;
 
-  server->connection[server->connection_s] = server_socket_connect(server->data, settings);
+  server->client[server->connection_s].connection = server_socket_connect(server->data, settings);
   server->connection_s++;
   printf("done.\n");
 }
 
 char* server_read(server_s* server){
-  char buffer[server->connection->settings.char_limit];
-  memset(buffer, 0, server->connection->settings.char_limit);
+  char buffer[server->data.settings.char_limit];
+  memset(buffer, 0, server->data.settings.char_limit);
 
-  read(server->connection[0].sock, buffer, server->connection->settings.char_limit);
+  read(server->client[0].connection.sock, buffer, server->data.settings.char_limit);
   char* result;
   asprintf(&result, "%s", buffer);
 
@@ -40,16 +40,16 @@ char* server_read(server_s* server){
 
 void server_send(server_s* server,const char* message){
   for(int i = 0; i < server->connection_s; i++){
-    send(server->connection[i].sock, message, strlen(message), 0);
+    send(server->client[i].connection.sock, message, strlen(message), 0);
   }
   printf("Message sent!\n");
 }
 
 void server_close(server_s* server, int id){
-  close(server->connection[id].fd);
+  close(server->client[id].connection.fd);
 
   for(int i = id; i < server->connection_s - 1; i++){
-    server->connection[i] = server->connection[i + 1];
+    server->client[i] = server->client[i + 1];
   }
 
   server->connection_s--;

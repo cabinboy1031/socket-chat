@@ -8,8 +8,23 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+/**
+   General connection settings.
+   Given the nature of these settings, they MUST be modified
+   and set by the server before connections begin.
+   They SHALL NOT be modified by the client.
+
+   Items marked with [SERVER] do not need to be sent over the network for the client to know.
+   However, this may be useful information to the client.
+
+   char_limit: the maximum byte limit for messages.
+   max_clients [SERVER]: the maximum number of clients that one server can handle at a time.
+   max_connections [SERVER]: the maximum number of connections that a server should try and resolve
+ */
 typedef struct settings_s {
   int char_limit;
+  int max_clients;
+  int max_connections;
   struct sockaddr_in address;
 } settings_s;
 
@@ -20,7 +35,7 @@ typedef struct connection_s {
 } connection_s;
 
 /**
- * Returns data representing the server connection
+ * Creates a client connection to the specified URL.
  */
 connection_s client_socket_connect(const char* url,const int port, settings_s settings);
 
