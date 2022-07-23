@@ -5,7 +5,7 @@ INCLUDE = `pkg-config --libs json-c`
 DEPS =
 OUT_FILE = chat
 
-all: $(OUT_FILE) install   # build all listed targets: output_file, install
+all: $(OUT_FILE) # build all listed targets: output_file, install
 
 $(OUT_FILE): $(OBJS)       # target: dependency list of *.o files
 	$(CC) $(CFLAGS) $^ $(INCLUDE) -o $@
