@@ -5,41 +5,39 @@
 #include <string.h>
 #include <time.h>
 
-#include "./socket.h"
 #include "./server.h"
+#include "./client.h"
 #include "./message.h"
 
 #define ARGV_RUN(run_str, run_func) if (!strcmp(argv[1], run_str)) { \
     run_func;                                                       \
   };
 
-void client_run(const char* data) {
+void client_run() {
+  char* url = "127.0.0.1";
+  client_s client = client_connect(url, 1234);
+
+  // construct message
   time_t timer;
-  message_s message = {
-    .username = "mystic",
-    .datetime = time(&timer)
-  };
-  strcpy(message.data, data);
-  const char *message_j = message_mpack_serialize(message);
+  message_s message = {.username = "mystic", .datetime = time(&timer)};
+  read(0, message.data, 1024);
 
-  settings_s settings;
-  settings.char_limit = 2048;
-  char *url = "127.0.0.1";
-  connection_s client = client_socket_connect(url, 1234, settings);
-
-  send(client.sock, message_j, strlen(message_j), 0);
+  // send message through client
+  serialized_s message_j = message_mpack_serialize(message);
+  client_send(&client, message_j);
   printf("Message sent!\n");
 
-  char buffer[2048] = {0};
-  read(client.sock, buffer, 2048);
-  message_s message_c = message_mpack_deserialize(buffer);
-  printf("[%d:%d] %s: %s\n",
-         localtime(&message_c.datetime)->tm_hour,
-         localtime(&message_c.datetime)->tm_min,
-         message_c.username,
-         message_c.data);
+  //recieve message from client
 
-  close(client.fd);
+  const char* message_c = client_read(&client);
+  message_s message_m = message_mpack_deserialize(message_c);
+  printf("[%d:%d] %s: %s\n",
+         localtime(&message_m.datetime)->tm_hour,
+         localtime(&message_m.datetime)->tm_min,
+         message_m.username,
+         message_m.data);
+
+  close(client.connection.fd);
 }
 
 void server_run() {
@@ -59,7 +57,7 @@ void server_run() {
     message_s message = {.username = "server",
                          .datetime = time(&timer)};
     strcpy(message.data, message_c.data);
-    const char *message_j = message_mpack_serialize(message);
+    serialized_s message_j = message_mpack_serialize(message);
 
     server_send(&server, message_j);
     server_close(&server, 0);
@@ -90,10 +88,7 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  ARGV_RUN("c",
-    char data[1024] = {0};
-    read(0, data, 1024);
-    client_run(data));
+  ARGV_RUN("c", client_run());
   ARGV_RUN("s", server_run());
 }
 

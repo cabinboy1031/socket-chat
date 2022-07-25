@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include "serialization.h"
 /**
    General connection settings.
    Given the nature of these settings, they MUST be modified
@@ -22,11 +23,16 @@
    max_connections [SERVER]: the maximum number of connections that a server should try and resolve
  */
 typedef struct settings_s {
+  char server_name[32];
   int char_limit;
   int max_clients;
   int max_connections;
   struct sockaddr_in address;
 } settings_s;
+
+settings_s settings_deserialize(const char* data);
+serialized_s settings_serialize(settings_s settings);
+void settings_printf(settings_s data);
 
 typedef struct connection_s {
   int fd;
@@ -37,7 +43,7 @@ typedef struct connection_s {
 /**
  * Creates a client connection to the specified URL.
  */
-connection_s client_socket_connect(const char* url,const int port, settings_s settings);
+connection_s client_socket_connect(const char* url,const int port);
 
 connection_s server_socket_setup(int port, settings_s settings);
 connection_s server_socket_connect(connection_s setup, settings_s settings);

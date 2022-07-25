@@ -1,4 +1,6 @@
+#pragma once
 #include <time.h>
+#include "serialization.h"
 
 typedef struct message_s {
   char data[1024];
@@ -14,4 +16,4 @@ message_s message_mpack_deserialize(const char* message);
 /**
    serialize message structure to MessagePack protocol
  */
-const char *message_mpack_serialize(message_s message);
+serialized_s message_mpack_serialize(message_s message);

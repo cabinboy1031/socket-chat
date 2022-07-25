@@ -18,14 +18,14 @@ message_s message_mpack_deserialize(const char* data){
   mpack_node_t root = mpack_tree_root(&tree);
 
   message_s result;
-  mpack_node_copy_cstr(mpack_node_map_cstr(root,"data"), result.data, 1024);
+  mpack_node_copy_cstr(mpack_node_map_cstr(root,"data"), result.data, sizeof(result.data));
   mpack_node_copy_cstr(mpack_node_map_cstr(root,"username"), result.username, 20);
   result.datetime = mpack_node_uint(mpack_node_map_cstr(root, "datetime"));
 
   return result;
 }
 
-const char* message_mpack_serialize(message_s message){
+serialized_s message_mpack_serialize(message_s message){
   char *data;
   size_t size;
   mpack_writer_t writer;
@@ -39,8 +39,8 @@ const char* message_mpack_serialize(message_s message){
 
   if(mpack_writer_destroy(&writer) != mpack_ok){
     fprintf(stdout, "an error occurred encoding the data! \n");
-    return "";
+    return (serialized_s){.data = "", .size = 0};
   }
 
-  return data;
+  return (serialized_s) {.data = data, .size = size};
 }
