@@ -5,10 +5,9 @@ client_s client_connect(const char* url, int port){
   connection_s conn = client_socket_connect(url, 1234);
   printf("done.\n");
 
-  printf("Synchronizing settings with the server...\n");
+  printf("Synchronizing settings with the server...");
   char buffer[1024];
   read(conn.sock, buffer, 1024);
-  printf("%s\n", buffer);
   settings_s server_s = settings_deserialize(buffer);
   server_s.address = conn.settings.address;
 
@@ -18,7 +17,6 @@ client_s client_connect(const char* url, int port){
   printf("done.\n");
 
   settings_printf(client.connection.settings);
-  printf("done.\n\n");
 
   return client;
 }

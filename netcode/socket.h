@@ -6,6 +6,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 
 #include "serialization.h"

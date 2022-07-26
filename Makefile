@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -ggdb -O0 `pkg-config --cflags json-c`
-OBJS = chat.c server.o client.o socket.o message.o mpack/mpack.o
+OBJS = chat.c netcode/server.o netcode/client.o netcode/socket.o netcode/message.o mpack/mpack.o
 INCLUDE = `pkg-config --libs json-c`
 DEPS =
 OUT_FILE = chat
@@ -10,7 +10,8 @@ all: $(OUT_FILE) # build all listed targets: output_file, install
 $(OUT_FILE): $(OBJS)       # target: dependency list of *.o files
 	$(CC) $(CFLAGS) $^ $(INCLUDE) -o $@
 
-%.o: %.c $(DEPS)           # for all *.o files: if its *.c or *.h file changed
+build/%.o: %.c $(DEPS)           # for all *.o files: if its *.c or *.h file changed
+	mkdir -p ${dir $@}
 	$(CC) -ggdb -c $*.c -o $@    # compile corresponding .c file again, and give its the current target name
 
 install: $(OUT_FILE)                      # make will build output_file first
@@ -24,4 +25,4 @@ run: install                              # depend on install
 clean:
 	rm -f `find . -iname "*.o"` > /dev/null				  # Remove all *.o files
 	rm -f $(OUT_FILE)
-	sudo rm -f /usr/local/bin/$(OUT_FILE) # Remove the output_file
+	#sudo rm -f /usr/local/bin/$(OUT_FILE) # Remove the output_file

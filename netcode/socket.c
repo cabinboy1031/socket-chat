@@ -1,11 +1,6 @@
 #include "socket.h"
 #include "serialization.h"
 
-#define set_mpack_data(writer, token, expression, data)                        \
-  {                                                                            \
-    mpack_write_cstr(&writer, token);                                          \
-    expression(&writer, data);                                                 \
-  }
 
 settings_s settings_deserialize(const char *data){
   mpack_tree_t tree;
@@ -13,13 +8,16 @@ settings_s settings_deserialize(const char *data){
   mpack_tree_parse(&tree);
   mpack_node_t root = mpack_tree_root(&tree);
 
+  // FIXME: Workaround converts int data to string to be converted back.
   settings_s settings;
-  settings.char_limit = mpack_node_u64(mpack_node_map_cstr(root, "byte_limit"));
-  settings.max_clients = mpack_node_u64(mpack_node_map_cstr(root, "max_clients"));
-  settings.max_connections = mpack_node_u64(mpack_node_map_cstr(root, "max_connections"));
-  mpack_node_copy_cstr(mpack_node_map_cstr(root, "name"), settings.server_name,
-                       sizeof(settings.server_name));
-  settings_printf(settings);
+  char buffer[9];
+  mpack_node_copy_cstr(mpack_node_map_cstr(root, "name"), settings.server_name, sizeof(settings.server_name));
+  mpack_node_copy_cstr(mpack_node_map_cstr(root, "byte_limit"),buffer, sizeof(buffer));
+  settings.char_limit = atoi(buffer);
+  mpack_node_copy_cstr(mpack_node_map_cstr(root, "max_clients"), buffer, sizeof(buffer));
+  settings.max_clients = atoi(buffer);
+  mpack_node_copy_cstr(mpack_node_map_cstr(root, "max_connections"), buffer, sizeof(buffer));
+  settings.max_connections = atoi(buffer);
 
   return settings;
 }
@@ -30,11 +28,16 @@ serialized_s settings_serialize(settings_s settings){
   mpack_writer_t writer;
   mpack_writer_init_growable(&writer, &data, &size);
 
+  // FIXME: Workaround converts int data to string to be converted back.
   mpack_start_map(&writer, 4);
+  char* result;
   set_mpack_data(writer, "name", mpack_write_cstr, settings.server_name);
-  set_mpack_data(writer, "byte_limit", mpack_write_uint, settings.char_limit);
-  set_mpack_data(writer, "max_clients", mpack_write_uint, settings.max_clients);
-  set_mpack_data(writer, "max_connections", mpack_write_uint, settings.max_connections);
+  asprintf(&result, "%d", settings.char_limit);
+  set_mpack_data(writer, "byte_limit", mpack_write_cstr, result);
+  asprintf(&result, "%d", settings.max_clients);
+  set_mpack_data(writer, "max_clients", mpack_write_cstr, result);
+  asprintf(&result, "%d", settings.max_connections);
+  set_mpack_data(writer, "max_connections", mpack_write_cstr, result);
   mpack_finish_map(&writer);
 
   if (mpack_writer_destroy(&writer) != mpack_ok) {

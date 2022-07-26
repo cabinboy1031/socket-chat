@@ -28,8 +28,6 @@ void server_listen(server_s *server) {
 
   printf("Synchronizing settings with client...\n");
   serialized_s settings_c = settings_serialize(server->data.settings);
-
-  settings_printf(server->data.settings);
   send(server->client[server->client_s].connection.sock, settings_c.data, settings_c.size, 0);
 
   server->client_s++;

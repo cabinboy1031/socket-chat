@@ -1,6 +1,6 @@
 #include "message.h"
 
-#include "mpack/mpack.h"
+#include "serialization.h"
 
 #include <stdio.h>
 #include <string.h>

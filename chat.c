@@ -5,9 +5,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "./server.h"
-#include "./client.h"
-#include "./message.h"
+#include "netcode/server.h"
+#include "netcode/client.h"
+#include "netcode/message.h"
 
 #define ARGV_RUN(run_str, run_func) if (!strcmp(argv[1], run_str)) { \
     run_func;                                                       \
@@ -31,7 +31,7 @@ void client_run() {
 
   const char* message_c = client_read(&client);
   message_s message_m = message_mpack_deserialize(message_c);
-  printf("[%d:%d] %s: %s\n",
+  printf("[%02d:%02d] %s: %s\n",
          localtime(&message_m.datetime)->tm_hour,
          localtime(&message_m.datetime)->tm_min,
          message_m.username,
@@ -49,7 +49,7 @@ void server_run() {
     char *buffer = server_read(&server);
     message_c = message_mpack_deserialize(buffer);
 
-    printf("[%d:%d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
+    printf("[%02d:%02d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
            localtime(&message_c.datetime)->tm_min, message_c.username,
            message_c.data);
 
