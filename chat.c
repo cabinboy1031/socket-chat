@@ -9,6 +9,8 @@
 #include "net/client.h"
 #include "net/message.h"
 
+#include "ui/interface.h"
+
 #define ARGV_RUN(run_str, run_func) if (!strcmp(argv[1], run_str)) { \
     run_func;                                                       \
   };
@@ -60,29 +62,20 @@ void server_run() {
   server_stop(server);
 }
 
-int main(int argc, char* argv[]){
-  /*
-  WINDOW *mainwin = initscr();
+  int main(int argc, char *argv[]) {
 
-  initscr(); cbreak(); noecho();
-  intrflush(stdscr, FALSE);
-  keypad(stdscr, TRUE);
+    interface_setup();
+    interface_full_refresh();
+    sleep(3);
+    interface_teardown();
 
-  mvaddstr(13,33, "Hello, World!");
-  refresh();
-  sleep(3);
+    /*
+    if(argc == 1){
+      printf("Usage: ./chat [c | s]\n");
+      return -1;
+    }
 
-  delwin(mainwin);
-  endwin();
-  refresh();
-  */
-
-  if(argc == 1){
-    printf("Usage: ./chat [c | s]\n");
-    return -1;
+    ARGV_RUN("c", client_run());
+    ARGV_RUN("s", server_run());
+     */
   }
-
-  ARGV_RUN("c", client_run());
-  ARGV_RUN("s", server_run());
-}
-
