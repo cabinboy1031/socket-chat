@@ -5,9 +5,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "netcode/server.h"
-#include "netcode/client.h"
-#include "netcode/message.h"
+#include "net/server.h"
+#include "net/client.h"
+#include "net/message.h"
 
 #define ARGV_RUN(run_str, run_func) if (!strcmp(argv[1], run_str)) { \
     run_func;                                                       \
@@ -37,11 +37,12 @@ void client_run() {
 }
 
 void server_run() {
-  server_s server;
   message_s message_c = {};
+
+  server_s server = server_new(1234);
   while(strcmp(message_c.data, "/quit")){
-    server = server_new(1234);
     server_listen(&server);
+
     char *buffer = server_read(&server);
     message_c = message_mpack_deserialize(buffer);
     printf("%s", message_printf(message_c));
