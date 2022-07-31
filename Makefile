@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -ggdb -O0 `pkg-config --cflags json-c`
-OBJS = chat.c netcode/server.o netcode/client.o netcode/socket.o netcode/message.o mpack/mpack.o
+OBJS = chat.c net/server.o net/client.o net/socket.o net/message.o mpack/mpack.o
 INCLUDE = `pkg-config --libs json-c`
 DEPS =
 OUT_FILE = chat

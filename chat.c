@@ -31,11 +31,7 @@ void client_run() {
 
   const char* message_c = client_read(&client);
   message_s message_m = message_mpack_deserialize(message_c);
-  printf("[%02d:%02d] %s: %s\n",
-         localtime(&message_m.datetime)->tm_hour,
-         localtime(&message_m.datetime)->tm_min,
-         message_m.username,
-         message_m.data);
+  printf("%s", message_printf(message_m));
 
   close(client.connection.fd);
 }
@@ -48,10 +44,7 @@ void server_run() {
     server_listen(&server);
     char *buffer = server_read(&server);
     message_c = message_mpack_deserialize(buffer);
-
-    printf("[%02d:%02d] %s: %s\n", localtime(&message_c.datetime)->tm_hour,
-           localtime(&message_c.datetime)->tm_min, message_c.username,
-           message_c.data);
+    printf("%s", message_printf(message_c));
 
     time_t timer;
     message_s message = {.username = "server",
